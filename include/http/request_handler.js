@@ -59,6 +59,17 @@ module.exports = function RequestHandlerModule(pb) {
     };
 
     /**
+     * Indicates is the site is hosted within a domain sub-directory.
+     * @private
+     * @static
+     * @readonly SITE_PATH
+     * @type {String}
+     */
+    var SITE_PATH = (function(url){
+        return (url.path && url.path !== '/') ? url.path : '';
+    })(url.parse(pb.config.siteRoot));
+
+    /**
      * The fallback theme (pencilblue)
      * @static
      * @property DEFAULT_THEME
@@ -1138,6 +1149,12 @@ module.exports = function RequestHandlerModule(pb) {
      */
     RequestHandler.prototype.doRedirect = function(location) {
         this.resp.statusCode = 302;
+
+        // if location is  handle location '/path', make relative siteRoot
+        if (/^\//.test(location)){
+            location = path.join(SITE_PATH, location);
+        }
+
         this.resp.setHeader("Location", location);
         this.resp.end();
     };
